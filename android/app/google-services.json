@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1005037853548",
+    "project_id": "fir-course-3dac6",
+    "storage_bucket": "fir-course-3dac6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1005037853548:android:4597dda7a9a4753a4b3149",
+        "android_client_info": {
+          "package_name": "com.example.firebasecourse"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYx154wCwT46FYyWZ--Gbx6q6j9PUWPWs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
