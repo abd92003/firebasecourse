@@ -19,9 +19,25 @@ class _LoginState extends State<Login> {
 
   // ✅ Form Key
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  Future<UserCredential> signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
   // ✅ Google Sign-In Instance
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  //final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   Widget build(BuildContext context) {
@@ -160,7 +176,7 @@ class _LoginState extends State<Login> {
               color: Colors.red[700],
               textColor: Colors.white,
               onPressed: () async {
-                await _signInWithGoogle();
+                await signInWithGoogle();
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -201,71 +217,6 @@ class _LoginState extends State<Login> {
     );
   }
 
-  // ✅ دالة تسجيل الدخول بجوجل
-  Future<void> _signInWithGoogle() async {
-    try {
-      AppDialogs.loading(context);
-
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-
-      if (googleUser == null) {
-        AppDialogs.hideLoading(context);
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth =
-          await googleUser.authentication;
-
-      final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      await FirebaseAuth.instance.signInWithCredential(credential);
-
-      AppDialogs.hideLoading(context);
-
-      if (mounted) {
-        AppDialogs.success(context, 'Logged in with Google successfully!');
-        Future.delayed(const Duration(milliseconds: 1500), () {
-          if (mounted) {
-            Navigator.of(context).pushReplacementNamed("homepage");
-          }
-        });
-      }
-    } on FirebaseAuthException catch (e) {
-      AppDialogs.hideLoading(context);
-      if (mounted) {
-        String message = '';
-        if (e.code == 'account-exists-with-different-credential') {
-          message =
-              'An account already exists with the same email but different sign-in credentials.';
-        } else if (e.code == 'invalid-credential') {
-          message = 'Invalid credentials provided. Please try again.';
-        } else {
-          message = 'Google sign-in failed: ${e.message}';
-        }
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            AppDialogs.error(context, message);
-          }
-        });
-      }
-    } catch (e) {
-      AppDialogs.hideLoading(context);
-      if (mounted) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            AppDialogs.error(
-              context,
-              'An unexpected error occurred: ${e.toString()}',
-            );
-          }
-        });
-      }
-    }
-  }
 
   String _getLoginErrorMessage(FirebaseAuthException e) {
     switch (e.code) {
