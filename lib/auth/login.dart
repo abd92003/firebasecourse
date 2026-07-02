@@ -115,9 +115,11 @@ class _LoginState extends State<Login> {
                         );
 
                     AppDialogs.hideLoading(context);
-
-                    if (mounted) {
+                    if(credential.user!.emailVerified) {
                       Navigator.of(context).pushReplacementNamed("homepage");
+                    }
+                    else{
+                      AppDialogs.error(context, "Email Not Verified. Please verify your email before logging in.");
                     }
                   } on FirebaseAuthException catch (e) {
                     AppDialogs.hideLoading(context);

@@ -29,7 +29,8 @@ class _HomepageState extends State<Homepage> {
       ),
       body: ListView(
         children: [
-          // Text("How Are You", style: )
+          Text("User ID: ${FirebaseAuth.instance.currentUser!.uid}"),
+          Text("Email: ${FirebaseAuth.instance.currentUser!.email}"),
         ],
       ),
     );

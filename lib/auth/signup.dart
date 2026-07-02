@@ -16,7 +16,6 @@ class _SignUpState extends State<SignUp> {
   TextEditingController username = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
-  
 
   // ✅ صح: formKey (مو formkey)
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
@@ -122,19 +121,14 @@ class _SignUpState extends State<SignUp> {
                           email: email.text.trim(),
                           password: password.text.trim(),
                         );
-
+                    await FirebaseAuth.instance.currentUser!
+                        .sendEmailVerification();
                     AppDialogs.hideLoading(context);
 
                     if (mounted) {
-                      AppDialogs.success(
-                        context,
-                        'Account created successfully!',
-                      );
                       Future.delayed(const Duration(milliseconds: 1500), () {
                         if (mounted) {
-                          Navigator.of(
-                            context,
-                          ).pushReplacementNamed("homepage");
+                          Navigator.of(context).pushReplacementNamed("login");
                         }
                       });
                     }
