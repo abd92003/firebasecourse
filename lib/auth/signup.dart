@@ -16,6 +16,10 @@ class _SignUpState extends State<SignUp> {
   TextEditingController username = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
+  
+
+  // ✅ صح: formKey (مو formkey)
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -24,90 +28,149 @@ class _SignUpState extends State<SignUp> {
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(height: 50),
-                const CustomLogoAuth(),
-                Container(height: 20),
-                const Text(
-                  "SignUp",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-                Container(height: 10),
-                const Text(
-                  "SignUp To Continue Using The App",
-                  style: TextStyle(color: Colors.grey),
-                ),
-                Container(height: 20),
-                const Text(
-                  "username",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                Container(height: 10),
-                CustomTextForm(
-                  hinttext: "ُEnter Your username",
-                  mycontroller: username,
-                ),
-                Container(height: 20),
-                const Text(
-                  "Email",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                Container(height: 10),
-                CustomTextForm(
-                  hinttext: "ُEnter Your Email",
-                  mycontroller: email,
-                ),
-                Container(height: 10),
-                const Text(
-                  "Password",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                Container(height: 10),
-                CustomTextForm(
-                  hinttext: "ُEnter Your Password",
-                  mycontroller: password,
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 10, bottom: 20),
-                  alignment: Alignment.topRight,
-                  child: const Text(
-                    "Forgot Password ?",
-                    style: TextStyle(fontSize: 14),
+            // ✅ صح: formKey (مو formkey)
+            Form(
+              key: formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(height: 50),
+                  const CustomLogoAuth(),
+                  Container(height: 20),
+                  const Text(
+                    "Sign Up",
+                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
                   ),
-                ),
-              ],
+                  Container(height: 10),
+                  const Text(
+                    "Sign Up To Continue Using The App",
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  Container(height: 20),
+                  const Text(
+                    "Username",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  Container(height: 10),
+                  CustomTextForm(
+                    hinttext: "Enter Your Username",
+                    mycontroller: username,
+                    // ✅ أضف validation
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your username';
+                      }
+                      return null;
+                    },
+                  ),
+                  Container(height: 20),
+                  const Text(
+                    "Email",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  Container(height: 10),
+                  CustomTextForm(
+                    hinttext: "Enter Your Email",
+                    mycontroller: email,
+                    // ✅ أضف validation
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your email';
+                      }
+                      if (!RegExp(
+                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                      ).hasMatch(value)) {
+                        return 'Please enter a valid email';
+                      }
+                      return null;
+                    },
+                  ),
+                  Container(height: 10),
+                  const Text(
+                    "Password",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  Container(height: 10),
+                  CustomTextForm(
+                    hinttext: "Enter Your Password",
+                    mycontroller: password,
+                    // ✅ أضف validation
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter your password';
+                      }
+                      if (value.length < 6) {
+                        return 'Password must be at least 6 characters';
+                      }
+                      return null;
+                    },
+                  ),
+                  Container(height: 20),
+                ],
+              ),
             ),
             CustomButtonAuth(
-              title: "SignUp",
+              title: "Sign Up",
               onPressed: () async {
-                try {
-                  final credential = await FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                        email: email.text,
-                        password: password.text,
+                // ✅ صح: formKey (مو formkey)
+                if (formKey.currentState!.validate()) {
+                  AppDialogs.loading(context);
+
+                  try {
+                    final credential = await FirebaseAuth.instance
+                        .createUserWithEmailAndPassword(
+                          email: email.text.trim(),
+                          password: password.text.trim(),
+                        );
+
+                    AppDialogs.hideLoading(context);
+
+                    if (mounted) {
+                      AppDialogs.success(
+                        context,
+                        'Account created successfully!',
                       );
-                  Navigator.of(context).pushReplacementNamed("homepage");
-                } on FirebaseAuthException catch (e) {
-                  if (e.code == 'weak-password') {
-                    AppDialogs.error(context, 'The password provided is too weak.');
-                  } else if (e.code == 'email-already-in-use') {
-                    AppDialogs.error(context, 'The account already exists for that email.');
+                      Future.delayed(const Duration(milliseconds: 1500), () {
+                        if (mounted) {
+                          Navigator.of(
+                            context,
+                          ).pushReplacementNamed("homepage");
+                        }
+                      });
+                    }
+                  } on FirebaseAuthException catch (e) {
+                    AppDialogs.hideLoading(context);
+
+                    if (mounted) {
+                      String message = _getSignUpErrorMessage(e);
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          AppDialogs.error(context, message);
+                        }
+                      });
+                    }
+                  } catch (e) {
+                    AppDialogs.hideLoading(context);
+                    if (mounted) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          AppDialogs.error(
+                            context,
+                            'An unexpected error occurred: ${e.toString()}',
+                          );
+                        }
+                      });
+                    }
                   }
-                } catch (e) {
-                  print(e);
                 }
               },
             ),
-
             Container(height: 20),
-
-            Container(height: 20),
-            // Text("Don't Have An Account ? Resister" , textAlign: TextAlign.center,)
             InkWell(
               onTap: () {
-                Navigator.of(context).pushNamed("login");
+                if (mounted) {
+                  Navigator.of(context).pushNamed("login");
+                }
               },
               child: const Center(
                 child: Text.rich(
@@ -130,5 +193,27 @@ class _SignUpState extends State<SignUp> {
         ),
       ),
     );
+  }
+
+  String _getSignUpErrorMessage(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'email-already-in-use':
+        return 'This email is already in use.\n\nIf you have an account, please login instead.';
+
+      case 'invalid-email':
+        return 'The email address is not valid.\n\nPlease enter a valid email (e.g., user@example.com).';
+
+      case 'weak-password':
+        return 'The password is too weak.\n\nPassword must contain:\n• At least 6 characters\n• Uppercase and lowercase letters\n• Numbers and special characters';
+
+      case 'operation-not-allowed':
+        return 'Account creation is not enabled.\n\nPlease contact support for assistance.';
+
+      case 'network-request-failed':
+        return 'No internet connection.\n\nPlease check your network and try again.';
+
+      default:
+        return 'An error occurred during sign up: ${e.message}\n\nPlease try again or contact support.';
+    }
   }
 }

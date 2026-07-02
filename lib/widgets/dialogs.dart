@@ -7,7 +7,7 @@ class AppDialogs {
       context,
       icon: Icons.check_circle_rounded,
       color: Colors.green,
-      title: 'success',
+      title: '✅ Success',
       message: message,
     );
   }
@@ -18,7 +18,7 @@ class AppDialogs {
       context,
       icon: Icons.error_outline_rounded,
       color: Colors.red,
-      title: 'error',
+      title: '❌ Error',
       message: message,
     );
   }
@@ -29,7 +29,7 @@ class AppDialogs {
       context,
       icon: Icons.warning_rounded,
       color: Colors.orange,
-      title: 'warning',
+      title: '⚠️ Warning',
       message: message,
     );
   }
@@ -38,19 +38,23 @@ class AppDialogs {
   static Future<bool> confirm(BuildContext context, String message) async {
     return await showDialog<bool>(
           context: context,
+          barrierDismissible: false,
           builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: Row(
               children: [
                 Icon(Icons.help_rounded, color: Colors.blue),
                 SizedBox(width: 8),
-                Text('ok'),
+                Text('❓ Confirm'),
               ],
             ),
             content: Text(message),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: Text('cancel', style: TextStyle(color: Colors.grey)),
+                child: Text('Cancel', style: TextStyle(color: Colors.grey)),
               ),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
@@ -58,7 +62,7 @@ class AppDialogs {
                   backgroundColor: Colors.blue,
                   foregroundColor: Colors.white,
                 ),
-                child: Text('confirm'),
+                child: Text('Confirm'),
               ),
             ],
           ),
@@ -67,20 +71,21 @@ class AppDialogs {
   }
 
   // 🔄 تحميل
-  static void loading(
-    BuildContext context, {
-    String message = 'loding...',
-  }) {
+  static void loading(BuildContext context, {String message = 'Loading...'}) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: Row(
           children: [
             SizedBox(
               width: 25,
               height: 25,
-              child: CircularProgressIndicator(strokeWidth: 2.5),
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: Colors.blue,
+              ),
             ),
             SizedBox(width: 16),
             Expanded(child: Text(message)),
@@ -91,7 +96,9 @@ class AppDialogs {
   }
 
   static void hideLoading(BuildContext context) {
-    if (Navigator.canPop(context)) Navigator.pop(context);
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    }
   }
 
   // الدالة الأساسية
@@ -104,7 +111,8 @@ class AppDialogs {
   }) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      barrierDismissible: true,
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -116,20 +124,25 @@ class AppDialogs {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 6),
-            Text(message, textAlign: TextAlign.center),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
             SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => Navigator.pop(dialogContext),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: color,
                   foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('ok'),
+                child: Text('OK'),
               ),
             ),
           ],
