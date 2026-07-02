@@ -19,10 +19,13 @@ class _LoginState extends State<Login> {
 
   // ✅ Form Key
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  Future<UserCredential> signInWithGoogle() async {
+  Future signInWithGoogle() async {
     // Trigger the authentication flow
     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-
+    if (googleUser == null) {
+      // The user canceled the sign-in
+      return;
+    }
     // Obtain the auth details from the request
     final GoogleSignInAuthentication? googleAuth =
         await googleUser?.authentication;
@@ -34,7 +37,8 @@ class _LoginState extends State<Login> {
     );
 
     // Once signed in, return the UserCredential
-    return await FirebaseAuth.instance.signInWithCredential(credential);
+    await FirebaseAuth.instance.signInWithCredential(credential);
+    Navigator.of(context).pushNamedAndRemoveUntil("homepage", (route) => false);
   }
   // ✅ Google Sign-In Instance
   //final GoogleSignIn _googleSignIn = GoogleSignIn();
