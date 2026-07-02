@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class Homepage extends StatefulWidget {
@@ -12,7 +13,20 @@ class _HomepageState extends State<Homepage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Firebase Install'), actions: []),
+      appBar: AppBar(
+        title: const Text('Firebase Install'),
+        actions: [
+          IconButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(
+                context,
+              ).pushNamedAndRemoveUntil("login", (route) => false);
+            },
+            icon: Icon(Icons.logout),
+          ),
+        ],
+      ),
       body: ListView(
         children: [
           // Text("How Are You", style: )

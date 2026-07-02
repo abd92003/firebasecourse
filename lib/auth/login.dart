@@ -1,3 +1,5 @@
+import 'package:firebasecourse/widgets/dialogs.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../components/custombuttonauth.dart';
 import '../components/customlogoauth.dart';
@@ -54,7 +56,7 @@ class _LoginState extends State<Login> {
                 Container(height: 10),
                 CustomTextForm(
                   hinttext: "ُEnter Your Password",
-                  mycontroller: email,
+                  mycontroller: password,
                 ),
                 Container(
                   margin: const EdgeInsets.only(top: 10, bottom: 20),
@@ -66,7 +68,25 @@ class _LoginState extends State<Login> {
                 ),
               ],
             ),
-            CustomButtonAuth(title: "login", onPressed: () {}),
+            CustomButtonAuth(
+              title: "login",
+              onPressed: () async {
+                try {
+                  final credential = await FirebaseAuth.instance
+                      .signInWithEmailAndPassword(
+                        email: email.text,
+                        password: password.text,
+                      );
+                  Navigator.of(context).pushReplacementNamed("homepage");
+                } on FirebaseAuthException catch (e) {
+                  if (e.code == 'user-not-found') {
+                    AppDialogs.error(context, 'No user found for that email.');
+                  } else if (e.code == 'wrong-password') {
+                    AppDialogs.error(context, 'Wrong password provided for that user.');
+                  }
+                }
+              },
+            ),
             Container(height: 20),
 
             MaterialButton(
@@ -89,7 +109,7 @@ class _LoginState extends State<Login> {
             // Text("Don't Have An Account ? Resister" , textAlign: TextAlign.center,)
             InkWell(
               onTap: () {
-                Navigator.of(context).pushNamed("signup");
+                Navigator.of(context).pushReplacementNamed("signup");
               },
               child: const Center(
                 child: Text.rich(

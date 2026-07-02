@@ -2,7 +2,9 @@
 import 'package:flutter/material.dart';
 import 'auth/login.dart';
 import 'auth/signup.dart';
+import 'package:firebasecourse/homepage.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,14 +20,28 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    FirebaseAuth.instance.authStateChanges().listen((user) {
+      if (user == null) {
+        print('User is currently signed out!');
+      } else {
+        print('User is signed in!');
+      }
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Login(),
+      home:FirebaseAuth.instance.currentUser == null ? Login() : Homepage(),
       routes: {
         "signup": (context) => SignUp(),
-        "login": (context) => Login()
+        "login": (context) => Login(),
+        "homepage": (context) => Homepage(),
       },
     );
   }
