@@ -121,12 +121,36 @@ class _LoginState extends State<Login> {
                       return null;
                     },
                   ),
-                  Container(
-                    margin: const EdgeInsets.only(top: 10, bottom: 20),
-                    alignment: Alignment.topRight,
-                    child: const Text(
-                      "Forgot Password ?",
-                      style: TextStyle(fontSize: 14),
+                  InkWell(
+                    onTap: () async {
+                      if (email.text.isEmpty || email.text.trim().isEmpty) {
+                        AppDialogs.error(
+                          context,
+                          'Please enter your email to reset password.',
+                        );
+                      }
+                      try {
+                        await FirebaseAuth.instance.sendPasswordResetEmail(
+                          email: email.text.trim(),
+                        );
+                      } on Exception catch (e) {
+                        AppDialogs.error(
+                          context,
+                          'Failed to send password reset email: ${e.toString()}',
+                        );
+                      }
+                      AppDialogs.success(
+                        context,
+                        'Password reset email sent to ${email.text.trim()}. Please check your inbox.',
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(top: 10, bottom: 20),
+                      alignment: Alignment.topRight,
+                      child: const Text(
+                        "Forgot Password ?",
+                        style: TextStyle(fontSize: 14),
+                      ),
                     ),
                   ),
                 ],
