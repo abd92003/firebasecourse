@@ -47,6 +47,7 @@ class _AddCategoryState extends State<AddCategory> {
                   if (val == "") {
                     return "Can't To be Empty";
                   }
+                  return null;
                 },
               ),
             ),

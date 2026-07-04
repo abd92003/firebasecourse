@@ -19,6 +19,7 @@ class _LoginState extends State<Login> {
 
   // ✅ Form Key
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool isLoding = false;
 
   // ✅ Google Sign-In
   Future<void> signInWithGoogle() async {
@@ -59,7 +60,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body:isLoding ? Center(child: CircularProgressIndicator()) : Container(
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
@@ -166,12 +167,16 @@ class _LoginState extends State<Login> {
                   AppDialogs.loading(context);
 
                   try {
+                    isLoding = true;
+                    setState(() {});
                     final credential = await FirebaseAuth.instance
                         .signInWithEmailAndPassword(
                           email: email.text.trim(),
                           password: password.text.trim(),
                         );
 
+                    isLoding = false;
+                    setState(() {});
                     AppDialogs.hideLoading(context);
 
                     // ✅ تحقق من تفعيل الإيميل

@@ -70,6 +70,60 @@ class AppDialogs {
         false;
   }
 
+  static void showDeleteDialog({
+    required BuildContext context,
+    required VoidCallback onDelete,
+    String title = 'Delete Item',
+    String message =
+        'Are you sure you want to delete this item?\nThis action cannot be undone.',
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(Icons.delete_forever, color: Colors.red, size: 28),
+            SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                title,
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Text(message, style: TextStyle(fontSize: 16)),
+        actions: [
+          // ✅ زر إلغاء (جهة اليسار)
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
+            ),
+          ),
+          // ✅ زر حذف (جهة اليمين)
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              onDelete();
+            },
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                color: Colors.red,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   // 🔄 تحميل
   static void loading(BuildContext context, {String message = 'Loading...'}) {
     showDialog(
