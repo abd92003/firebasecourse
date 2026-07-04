@@ -128,10 +128,15 @@ class _LoginState extends State<Login> {
                           context,
                           'Please enter your email to reset password.',
                         );
+                        return;
                       }
                       try {
                         await FirebaseAuth.instance.sendPasswordResetEmail(
                           email: email.text.trim(),
+                        );
+                        AppDialogs.success(
+                          context,
+                          'Password reset email sent to ${email.text.trim()}. Please check your inbox.',
                         );
                       } on Exception catch (e) {
                         AppDialogs.error(
@@ -139,10 +144,6 @@ class _LoginState extends State<Login> {
                           'Failed to send password reset email: ${e.toString()}',
                         );
                       }
-                      AppDialogs.success(
-                        context,
-                        'Password reset email sent to ${email.text.trim()}. Please check your inbox.',
-                      );
                     },
                     child: Container(
                       margin: const EdgeInsets.only(top: 10, bottom: 20),
