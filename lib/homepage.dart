@@ -20,7 +20,7 @@ class _HomepageState extends State<Homepage> {
           IconButton(
             onPressed: () async {
               GoogleSignIn googleSignIn = GoogleSignIn();
-              await googleSignIn.disconnect();
+              await googleSignIn.signOut();
               await FirebaseAuth.instance.signOut();
               Navigator.of(
                 context,

@@ -177,10 +177,6 @@ class _LoginState extends State<Login> {
                     // ✅ تحقق من تفعيل الإيميل
                     if (credential.user!.emailVerified) {
                       if (mounted) {
-                        AppDialogs.success(
-                          context,
-                          'Welcome back! You have successfully logged in.',
-                        );
                         Future.delayed(const Duration(milliseconds: 1500), () {
                           if (mounted) {
                             Navigator.of(
