@@ -19,29 +19,42 @@ class _LoginState extends State<Login> {
 
   // ✅ Form Key
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  Future signInWithGoogle() async {
-    // Trigger the authentication flow
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    if (googleUser == null) {
-      // The user canceled the sign-in
-      return;
+
+  // ✅ Google Sign-In
+  Future<void> signInWithGoogle() async {
+    try {
+      AppDialogs.loading(context);
+
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        AppDialogs.hideLoading(context);
+        return;
+      }
+
+      final GoogleSignInAuthentication? googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      AppDialogs.hideLoading(context);
+
+      if (mounted) {
+        Navigator.of(
+          context,
+        ).pushNamedAndRemoveUntil("homepage", (route) => false);
+      }
+    } catch (e) {
+      AppDialogs.hideLoading(context);
+      if (mounted) {
+        AppDialogs.error(context, 'Google sign-in failed: ${e.toString()}');
+      }
     }
-    // Obtain the auth details from the request
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
-
-    // Create a new credential
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-
-    // Once signed in, return the UserCredential
-    await FirebaseAuth.instance.signInWithCredential(credential);
-    Navigator.of(context).pushNamedAndRemoveUntil("homepage", (route) => false);
   }
-  // ✅ Google Sign-In Instance
-  //final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   @override
   Widget build(BuildContext context) {
@@ -135,11 +148,34 @@ class _LoginState extends State<Login> {
                         );
 
                     AppDialogs.hideLoading(context);
-                    if(credential.user!.emailVerified) {
-                      Navigator.of(context).pushReplacementNamed("homepage");
-                    }
-                    else{
-                      AppDialogs.error(context, "Email Not Verified. Please verify your email before logging in.");
+
+                    // ✅ تحقق من تفعيل الإيميل
+                    if (credential.user!.emailVerified) {
+                      if (mounted) {
+                        AppDialogs.success(
+                          context,
+                          'Welcome back! You have successfully logged in.',
+                        );
+                        Future.delayed(const Duration(milliseconds: 1500), () {
+                          if (mounted) {
+                            Navigator.of(
+                              context,
+                            ).pushReplacementNamed("homepage");
+                          }
+                        });
+                      }
+                    } else {
+                      // ❌ الإيميل غير مفعل
+                      AppDialogs.error(
+                        context,
+                        'Email Not Verified.\n\n'
+                        'A verification email was sent to:\n'
+                        '${email.text.trim()}\n\n'
+                        'Please check your inbox and click the verification link.\n\n'
+                        'After verification, try logging in again.',
+                      );
+                      // ✅ تسجيل خروج المستخدم
+                      await FirebaseAuth.instance.signOut();
                     }
                   } on FirebaseAuthException catch (e) {
                     AppDialogs.hideLoading(context);
@@ -220,7 +256,6 @@ class _LoginState extends State<Login> {
       ),
     );
   }
-
 
   String _getLoginErrorMessage(FirebaseAuthException e) {
     switch (e.code) {

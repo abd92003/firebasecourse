@@ -17,7 +17,6 @@ class _SignUpState extends State<SignUp> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
 
-  // ✅ صح: formKey (مو formkey)
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
@@ -27,7 +26,6 @@ class _SignUpState extends State<SignUp> {
         padding: const EdgeInsets.all(20),
         child: ListView(
           children: [
-            // ✅ صح: formKey (مو formkey)
             Form(
               key: formKey,
               child: Column(
@@ -54,7 +52,6 @@ class _SignUpState extends State<SignUp> {
                   CustomTextForm(
                     hinttext: "Enter Your Username",
                     mycontroller: username,
-                    // ✅ أضف validation
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your username';
@@ -71,7 +68,6 @@ class _SignUpState extends State<SignUp> {
                   CustomTextForm(
                     hinttext: "Enter Your Email",
                     mycontroller: email,
-                    // ✅ أضف validation
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
@@ -93,7 +89,6 @@ class _SignUpState extends State<SignUp> {
                   CustomTextForm(
                     hinttext: "Enter Your Password",
                     mycontroller: password,
-                    // ✅ أضف validation
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
@@ -111,22 +106,34 @@ class _SignUpState extends State<SignUp> {
             CustomButtonAuth(
               title: "Sign Up",
               onPressed: () async {
-                // ✅ صح: formKey (مو formkey)
                 if (formKey.currentState!.validate()) {
                   AppDialogs.loading(context);
 
                   try {
+                    // 1. إنشاء الحساب
                     final credential = await FirebaseAuth.instance
                         .createUserWithEmailAndPassword(
                           email: email.text.trim(),
                           password: password.text.trim(),
                         );
-                    await FirebaseAuth.instance.currentUser!
-                        .sendEmailVerification();
+
+                    // 2. إرسال إيميل التحقق
+                    await credential.user!.sendEmailVerification();
+
                     AppDialogs.hideLoading(context);
 
+                    // 3. عرض رسالة نجاح للمستخدم
                     if (mounted) {
-                      Future.delayed(const Duration(milliseconds: 1500), () {
+                      AppDialogs.success(
+                        context,
+                        'Account created successfully!\n\n'
+                        'A verification email has been sent to:\n'
+                        '${email.text.trim()}\n\n'
+                        'Please check your inbox and verify your email.',
+                      );
+
+                      // 4. الانتقال إلى Login بعد 2 ثانية
+                      Future.delayed(const Duration(milliseconds: 2500), () {
                         if (mounted) {
                           Navigator.of(context).pushReplacementNamed("login");
                         }
