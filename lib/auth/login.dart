@@ -36,8 +36,8 @@ class _LoginState extends State<Login> {
           await googleUser.authentication;
 
       final credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth?.accessToken,
-        idToken: googleAuth?.idToken,
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
@@ -204,6 +204,8 @@ class _LoginState extends State<Login> {
                       await FirebaseAuth.instance.signOut();
                     }
                   } on FirebaseAuthException catch (e) {
+                    isLoding = false;
+                    setState(() {});
                     AppDialogs.hideLoading(context);
 
                     if (mounted) {

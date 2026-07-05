@@ -1,9 +1,12 @@
 // ignore_for_file: prefer_const_literals_to_create_immutables
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebasecourse/note/view.dart';
 import 'package:firebasecourse/widgets/dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '/categories/edit.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -17,9 +20,9 @@ class _HomepageState extends State<Homepage> {
 
   bool isLoading = true;
 
-  getData() async {
+  Future<void> getData() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-        .collection("categories")
+        .collection("categories").where("id", isEqualTo: FirebaseAuth.instance.currentUser!.uid)
         .get();
     data.addAll(querySnapshot.docs);
     isLoading = false;
@@ -69,32 +72,44 @@ class _HomepageState extends State<Homepage> {
               ),
               itemBuilder: (context, i) {
                 return InkWell(
-                  onLongPress: () {
-                    AppDialogs.showDeleteDialog(
-                      context: context,
-                      title: 'Delete Category',
-                      message:
-                          'Are you sure you want to delete "${data[i]['name']}"?\nThis action cannot be undone.',
-                      onDelete: () async {
-                        try {
-                          await FirebaseFirestore.instance
-                              .collection("categories")
-                              .doc(data[i].id)
-                              .delete();
-                          data.removeAt(i);
-                          setState(() {});
-                          AppDialogs.success(
-                            context,
-                            'Category deleted successfully!',
-                          );
-                        } catch (e) {
-                          AppDialogs.error(
-                            context,
-                            'Failed to delete: ${e.toString()}',
-                          );
-                        }
-                      },
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => NoteView(
+                          categoryid: data[i].id,
+                        ),
+                      ),
                     );
+                  },
+                  onLongPress: () {
+                    AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.warning,
+                      animType: AnimType.rightSlide,
+                      title: 'Edit Category',
+                      desc: 'what you need to do?',
+                      btnCancelText: "Delete",
+                      btnCancelOnPress: () async {
+                        await FirebaseFirestore.instance
+                            .collection("categories")
+                            .doc(data[i].id)
+                            .delete();
+                        setState(() {});
+                        Navigator.of(context).pushReplacementNamed("homepage");
+                      },
+                      btnOkText: "Edit",
+                      btnOkColor: Colors.blue,
+                      btnOkOnPress: () async {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => EditCategory(
+                              docid: data[i].id,
+                              oldname: data[i]['name'],
+                            ),
+                          ),
+                        );
+                      },
+                    ).show();
                   },
                   child: Card(
                     child: Container(
