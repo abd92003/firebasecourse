@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../components/custombuttonauth.dart';
 import '../components/customtextfieldadd.dart';
@@ -27,7 +26,7 @@ class _EditNoteState extends State<EditNote> {
 
   bool isLoading = false;
 
-  editNote() async {
+  Future<void> editNote() async {
     CollectionReference collectionnote = FirebaseFirestore.instance
         .collection("categories")
         .doc(widget.categorydocid)
@@ -85,6 +84,7 @@ class _EditNoteState extends State<EditNote> {
                         if (val == "") {
                           return "Can't To be Empty";
                         }
+                        return null;
                       },
                     ),
                   ),

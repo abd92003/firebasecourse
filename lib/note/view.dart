@@ -2,6 +2,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import '../note/add.dart';
 import '../note/edit.dart';
@@ -20,7 +21,7 @@ class _NoteViewState extends State<NoteView> {
 
   bool isLoading = true;
 
-  getData() async {
+  Future<void> getData() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection("categories")
         .doc(widget.categoryid)
@@ -93,6 +94,9 @@ class _NoteViewState extends State<NoteView> {
                               .collection("note")
                               .doc(data[i].id)
                               .delete();
+                              if (data[i]['url'] != "none") {
+                                await FirebaseStorage.instance.refFromURL(data[i]['url']).delete();
+                              }
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (context) =>
@@ -116,7 +120,12 @@ class _NoteViewState extends State<NoteView> {
                     child: Card(
                       child: Container(
                         padding: EdgeInsets.all(20),
-                        child: Column(children: [Text("${data[i]['note']}")]),
+                        child: Column(children: [
+                          Text("${data[i]['note']}"),
+                          SizedBox(height: 10),
+                          if (data[i]['url'] != "none") Image.network("${data[i]['url']}", height: 80, fit: BoxFit.cover),
+                          
+                        ]),
                       ),
                     ),
                   );

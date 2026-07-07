@@ -42,6 +42,8 @@ dependencies:
   google_sign_in: ^6.2.2
   adaptive_dialog: ^2.0.0
   awesome_dialog: ^3.3.0
+  image_picker: ^1.2.3
+
 
 dev_dependencies:
   flutter_test:

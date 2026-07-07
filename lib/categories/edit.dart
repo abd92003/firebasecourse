@@ -23,7 +23,7 @@ class _EditCategoryState extends State<EditCategory> {
 
   bool isLoading = false;
 
-  editCategory() async {
+  Future<void> editCategory() async {
     if (formState.currentState!.validate()) {
       try {
         isLoading = true;
@@ -72,6 +72,7 @@ class _EditCategoryState extends State<EditCategory> {
                         if (val == "") {
                           return "Can't To be Empty";
                         }
+                        return null;
                       },
                     ),
                   ),
